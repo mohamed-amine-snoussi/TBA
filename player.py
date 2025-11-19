@@ -1,5 +1,21 @@
 # Define the Player class.
 class Player():
+    """Représente le joueur dans le jeu.
+
+    Cette classe contient le nom du joueur et la pièce dans laquelle il se trouve.
+
+    Attributs
+    ---------
+    name : str
+        Le nom du joueur.
+    current_room : Room | None
+        La pièce actuelle dans laquelle se trouve le joueur.
+
+    Méthodes
+    --------
+    move(direction) -> bool
+        Déplace le joueur dans la direction donnée si une sortie existe.
+        Retourne True si le déplacement est possible, False sinon."""
 
     # Define the constructor.
     def __init__(self, name):

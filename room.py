@@ -1,6 +1,28 @@
 # Define the Room class.
 
 class Room:
+    """Représente un lieu dans le jeu d'aventure.
+
+    Cette classe modélise une pièce ou un lieu contenant un nom, une description
+    et des sorties menant vers d'autres lieux.
+
+    Attributs
+    ---------
+    name : str
+        Le nom du lieu.
+    description : str
+        La description du lieu.
+    exits : dict
+        Un dictionnaire associant une direction (str) à un autre objet Room.
+
+    Méthodes
+    --------
+    get_exit(direction) -> Room | None
+        Retourne la pièce située dans la direction donnée ou None si elle n'existe pas.
+    get_exit_string() -> str
+        Retourne une chaîne décrivant les sorties disponibles.
+    get_long_description() -> str
+        Retourne une description complète du lieu incluant les sorties."""
 
     # Define the constructor. 
     def __init__(self, name, description):
@@ -28,4 +50,4 @@ class Room:
 
     # Return a long description of this room including exits.
     def get_long_description(self):
-        return f"\nVous êtes {self.description}\n\n{self.get_exit_string()}\n"
+        return f"\nVous êtes dans {self.description}\n\n{self.get_exit_string()}\n"
