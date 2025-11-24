@@ -25,37 +25,42 @@ class Game:
         self.commands["help"] = help
         quit = Command("quit", " : quitter le jeu", Actions.quit, 0)
         self.commands["quit"] = quit
-        go = Command("go", " <direction> : se déplacer dans une direction cardinale (N, E, S, O)", Actions.go, 1)
+        go = Command("go", " <direction> : se déplacer dans une direction cardinale (N, E, S, O, U, D ou nord, sud, est, ouest, haut, bas)", Actions.go, 1)
         self.commands["go"] = go
         
         # Setup rooms
 
-        forest = Room("Forest", "une forêt enchantée. Vous entendez une brise légère à travers la cime des arbres.")
-        self.rooms.append(forest)
-        tower = Room("Tower", "une immense tour en pierre qui s'élève au dessus des nuages.")
-        self.rooms.append(tower)
-        cave = Room("Cave", "une grotte profonde et sombre. Des voix semblent provenir des profondeurs.")
-        self.rooms.append(cave)
-        cottage = Room("Cottage", "un petit chalet pittoresque avec un toit de chaume. Une épaisse fumée verte sort de la cheminée.")
-        self.rooms.append(cottage)
-        swamp = Room("Swamp", "un marécage sombre et ténébreux. L'eau bouillonne, les abords sont vaseux.")
-        self.rooms.append(swamp)
-        castle = Room("Castle", "un énorme château fort avec des douves et un pont levis. Sur les tours, des flèches en or massif.")
-        self.rooms.append(castle)
+        poste = Room("Poste de Police", "le hall du poste de police, rempli de dossiers et de cartes accrochées au mur.")
+        self.rooms.append(poste)
+        ruelle = Room("Ruelle du centre", "une ruelle étroite et sombre, encore marquée par des graffitis en forme de lys.")
+        self.rooms.append(ruelle)
+        hotel = Room("Hôtel abandonné", "le hall décrépit d'un ancien hôtel, condamné depuis une affaire jamais élucidée.")
+        self.rooms.append(hotel)
+        toit = Room("Toit de l'immeuble", "le toit de l'immeuble, balayé par le vent, avec vue sur la ville.")
+        self.rooms.append(toit)
+        chambre = Room("Chambre 407", "une chambre en désordre où un crime lié au LYS a été commis.")
+        self.rooms.append(chambre)
+        place = Room("Place du Lys", "une grande place dominée par une statue représentant un lys stylisé.")
+        self.rooms.append(place)
+        metro = Room("Métro désaffecté", "un quai de métro abandonné, plongé dans la pénombre.")
+        self.rooms.append(metro)
+        salle_secrete = Room("Salle secrète du LYS", "une salle cachée, remplie de dossiers brûlés et de symboles du LYS.")
+        self.rooms.append(salle_secrete)
 
         # Create exits for rooms
 
-        forest.exits = {"N" : cave, "E" : None, "S" : castle, "O" : None}
-        tower.exits = {"N" : cottage, "E" : None, "S" : None, "O" : None}
-        cave.exits = {"N" : None, "E" : cottage, "S" : forest, "O" : None}
-        cottage.exits = {"N" : None, "E" : None, "S" : tower, "O" : cave}
-        swamp.exits = {"N" : tower, "E" : None, "S" : None, "O" : castle}
-        castle.exits = {"N" : forest, "E" : swamp, "S" : None, "O" : None}
-
+        poste.exits = {"N" : ruelle}
+        ruelle.exits = {"S" : poste, "E" : hotel, "N" : place}
+        hotel.exits = {"O" : ruelle, "U" : chambre}
+        chambre.exits = {"D" : hotel, "E" : toit}
+        toit.exits = {"O" : chambre}
+        place.exits = {"S" : ruelle, "E" : metro}
+        metro.exits = {"O" : place, "D" : salle_secrete}
+        salle_secrete.exits = {"U" : metro}
         # Setup player and starting room
 
         self.player = Player(input("\nEntrez votre nom: "))
-        self.player.current_room = swamp
+        self.player.current_room = poste
 
     # Play the game
     def play(self):
