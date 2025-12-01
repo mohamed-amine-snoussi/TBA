@@ -103,8 +103,11 @@ class Actions:
             return False
 
         # Move the player in the direction specified by the parameter.
-        player.move(direction)
-        return True
+        if player.move(direction):
+            # AJOUTER LA NOUVELLE SALLE DANS L'HISTORIQUE
+            game.history.append(player.current_room)
+            return True
+        return False
 
     def quit(game, list_of_words, number_of_parameters):
         """
@@ -183,4 +186,49 @@ class Actions:
         for command in game.commands.values():
             print("\t- " + str(command))
         print()
+        return True
+    
+    def history(game, list_of_words, number_of_parameters):
+        """
+        Print the list of previously visited rooms.
+        Vérification du nombre de paramètres
+        """
+
+        if len(list_of_words) != 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+        
+        print("\nHistorique des salles visitées :")
+        for room in game.history:
+            print(f"\t- {room.name}")
+        print()
+
+        return True
+
+    def back(game, list_of_words, number_of_parameters):
+        """
+        Return to the previous room if possible.
+        """
+        # Vérification du nombre de paramètres
+        if len(list_of_words) != 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+        
+        # On ne peut pas revenir en arrière si on n’a qu’une seule salle
+        if len(game.history) < 2:
+            print("\nImpossible de revenir en arrière.\n")
+            return False
+        
+        # Supprimer la salle actuelle
+        game.history.pop()
+
+        # Nouvelle salle = dernière salle de la liste
+        previous_room = game.history[-1]
+        game.player.current_room = previous_room
+
+        # Afficher la nouvelle salle
+        print(previous_room.get_long_description())
+        Actions.history(game, ["history"], 0)
         return True

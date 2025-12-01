@@ -15,6 +15,7 @@ class Game:
         self.rooms = []
         self.commands = {}
         self.player = None
+        self.history = []   
     
     # Setup the game
     def setup(self):
@@ -27,6 +28,13 @@ class Game:
         self.commands["quit"] = quit
         go = Command("go", " <direction> : se déplacer dans une direction cardinale (N, E, S, O, U, D ou nord, sud, est, ouest, haut, bas)", Actions.go, 1)
         self.commands["go"] = go
+        history = Command("history", " : afficher l'historique des salles visitées", Actions.history, 0)
+        self.commands["history"] = history
+        back = Command("back", " : revenir à la salle précédente", Actions.back, 0)
+        self.commands["back"] = back
+
+        
+
         
         # Setup rooms
 
@@ -61,6 +69,8 @@ class Game:
 
         self.player = Player(input("\nEntrez votre nom: "))
         self.player.current_room = poste
+        self.history.append(self.player.current_room)
+
 
     # Play the game
     def play(self):
