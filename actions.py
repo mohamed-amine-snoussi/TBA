@@ -232,3 +232,91 @@ class Actions:
         print(previous_room.get_long_description())
         Actions.history(game, ["history"], 0)
         return True
+
+    def take(game, list_of_words, number_of_parameters):
+        if len(list_of_words) != 2:
+            print(MSG1.format(command_word="take"))
+            return False
+
+        item_name = list_of_words[1]
+        room = game.player.current_room
+
+        for item in room.items:
+            if item.name == item_name:
+                game.player.inventory.append(item)
+                room.items.remove(item)
+                print(f"\nVous avez ramassé : {item.name}\n")
+                return True
+
+        print(f"\nL'objet '{item_name}' n'est pas dans la pièce.\n")
+        return False
+
+
+    def drop(game, list_of_words, number_of_parameters):
+        if len(list_of_words) != 2:
+            print(MSG1.format(command_word="drop"))
+            return False
+
+        item_name = list_of_words[1]
+        inventory = game.player.inventory
+
+        for item in inventory:
+            if item.name == item_name:
+                inventory.remove(item)
+                game.player.current_room.items.append(item)
+                print(f"\nVous avez déposé : {item.name}\n")
+                return True
+
+        print(f"\nL'objet '{item_name}' n'est pas dans l'inventaire.\n")
+        return False
+
+
+    def inventory(game, list_of_words, number_of_parameters):
+        if len(list_of_words) != 1:
+            print(MSG0.format(command_word="inventory"))
+            return False
+
+        if not game.player.inventory:
+            print("\nVotre inventaire est vide.\n")
+            return True
+
+        print("\nVotre inventaire contient :")
+        for item in game.player.inventory:
+            print(f" - {item.name}")
+        print()
+        return True
+
+    def look(game, list_of_words, number_of_parameters):
+        if len(list_of_words) != 1:
+            print(MSG0.format(command_word="look"))
+            return False
+
+        room = game.player.current_room
+
+        if not room.items:
+            print("\nIl n'y a rien ici.\n")
+            return True
+
+        print("\nOn voit:")
+        for item in room.items:
+            print(f"\t- {item}")
+        print()
+        return True
+    
+    def check(game, list_of_words, number_of_parameters):
+        if len(list_of_words) != 1:
+            print(MSG0.format(command_word="check"))
+            return False
+
+        inventory = game.player.inventory
+
+        if not inventory:
+            print("\nVotre inventaire est vide.\n")
+            return True
+
+        print("\nVous disposez des items suivants:")
+        for item in inventory:
+            print(f"\t- {item}")
+        print()
+        return True
+

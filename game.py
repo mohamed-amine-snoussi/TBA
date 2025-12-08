@@ -6,6 +6,7 @@ from room import Room
 from player import Player
 from command import Command
 from actions import Actions
+from item import Item
 
 class Game:
 
@@ -32,6 +33,17 @@ class Game:
         self.commands["history"] = history
         back = Command("back", " : revenir à la salle précédente", Actions.back, 0)
         self.commands["back"] = back
+        take = Command("take", " <objet> : ramasser un objet", Actions.take, 1)
+        self.commands["take"] = take
+        drop = Command("drop", " <objet> : déposer un objet", Actions.drop, 1)
+        self.commands["drop"] = drop
+        inventory = Command("inventory", " : afficher votre inventaire", Actions.inventory, 0)
+        self.commands["inventory"] = inventory
+        look = Command("look", " : observer les objets présents", Actions.look, 0)
+        self.commands["look"] = look
+        check = Command("check", " : afficher l'inventaire", Actions.check, 0)
+        self.commands["check"] = check
+
 
         
 
@@ -54,6 +66,23 @@ class Game:
         self.rooms.append(metro)
         salle_secrete = Room("Salle secrète du LYS", "une salle cachée, remplie de dossiers brûlés et de symboles du LYS.")
         self.rooms.append(salle_secrete)
+
+        #setup items
+        dossier = Item("dossier", "Dossier secret portant le sceau du LYS", 1)
+        cle = Item("cle", "Ancienne clé métallique ouvrant une grille du métro", 1)
+        badge = Item("badge", "Badge d'accès réservé au personnel du poste", 1)
+        photo = Item("photo", "Photographie montrant une réunion secrète du LYS", 1)
+        carte = Item("carte", "Carte indiquant un passage scellé sous la place", 1)
+        dictaphone = Item("dictaphone", "Dictaphone contenant un message chiffré", 1)
+
+
+        # Placement des objets dans les salles
+        poste.items.append(badge)
+        hotel.items.append(dossier)
+        metro.items.append(cle)
+        place.items.append(carte)
+        toit.items.append(dictaphone)
+        chambre.items.append(photo)
 
         # Create exits for rooms
 
