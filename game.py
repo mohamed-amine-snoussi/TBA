@@ -66,34 +66,56 @@ class Game:
         self.rooms.append(metro)
         salle_secrete = Room("Salle secrète du LYS", "une salle cachée, remplie de dossiers brûlés et de symboles du LYS.")
         self.rooms.append(salle_secrete)
+        interrogatoire = Room("Salle d'interrogatoire","une salle froide éclairée par un néon, avec une table métallique et un miroir sans tain.")
+        self.rooms.append(interrogatoire)
+        archives = Room("Archives municipales","une salle remplie d'étagères poussiéreuses contenant des dossiers très anciens.")
+        self.rooms.append(archives)
+        local_tech = Room("Local technique du métro","une pièce étroite remplie de câbles, de plans et de coffres métalliques.")
+        self.rooms.append(local_tech)
+
 
         #setup items
-        dossier = Item("dossier", "Dossier secret portant le sceau du LYS", 1)
-        cle = Item("cle", "Ancienne clé métallique ouvrant une grille du métro", 1)
-        badge = Item("badge", "Badge d'accès réservé au personnel du poste", 1)
-        photo = Item("photo", "Photographie montrant une réunion secrète du LYS", 1)
-        carte = Item("carte", "Carte indiquant un passage scellé sous la place", 1)
-        dictaphone = Item("dictaphone", "Dictaphone contenant un message chiffré", 1)
+        badge = Item("badge", "Badge d'accès réservé au personnel du poste", 0.05)
+        dossier = Item("dossier", "Dossier secret portant le sceau du LYS", 0.30)
+        photo = Item("photo", "Photographie montrant une réunion secrète du LYS", 0.02)
+        carte = Item("carte", "Carte indiquant un passage scellé sous la place", 0.05)
+        dictaphone = Item("dictaphone", "Dictaphone contenant un message chiffré", 0.25)
+        cle_lourde = Item("cle_lourde", "Clé massive permettant d'ouvrir une grille sécurisée", 0.80)
+        temoignage = Item("temoignage","Compte rendu d'un témoin évoquant des réunions secrètes du LYS",0.05)
+        dossier_archives = Item("dossier_archives","Dossiers anciens reliant le LYS à des affaires passées",0.40)
+        disque_dur = Item("disque_dur","Disque dur chiffré contenant des preuves compromettantes",0.50)
+
+
 
 
         # Placement des objets dans les salles
         poste.items.append(badge)
         hotel.items.append(dossier)
-        metro.items.append(cle)
-        place.items.append(carte)
-        toit.items.append(dictaphone)
         chambre.items.append(photo)
+        toit.items.append(dictaphone)
+        place.items.append(carte)
+        interrogatoire.items.append(temoignage)
+        archives.items.append(dossier_archives)
+        local_tech.items.append(cle_lourde)
+        salle_secrete.items.append(disque_dur)
+
+
 
         # Create exits for rooms
 
-        poste.exits = {"N" : ruelle}
+        poste.exits = {"N" : ruelle, "D" : interrogatoire}
         ruelle.exits = {"S" : poste, "E" : hotel, "N" : place}
         hotel.exits = {"O" : ruelle, "U" : chambre}
         chambre.exits = {"D" : hotel, "E" : toit}
         toit.exits = {"O" : chambre}
-        place.exits = {"S" : ruelle, "E" : metro}
-        metro.exits = {"O" : place, "D" : salle_secrete}
+        place.exits = {"S" : ruelle, "E" : metro, "N" : archives}
+        metro.exits = {"O" : place, "D" : salle_secrete, "E" : local_tech}
         salle_secrete.exits = {"U" : metro}
+        local_tech.exits = {"O" : metro}
+        interrogatoire.exits = {"U": poste}
+        archives.exits = {"S": place}
+
+
         # Setup player and starting room
 
         self.player = Player(input("\nEntrez votre nom: "))

@@ -102,6 +102,21 @@ class Actions:
             print(player.current_room.get_long_description())
             return False
 
+        # Accès au local technique verrouillé sans la carte
+        if player.current_room.name == "Métro désaffecté" and direction == "E":
+            if not any(item.name == "carte" for item in player.inventory):
+                print("\nLe local technique est verrouillé. Il vous faut un plan d'accès.\n")
+                return False
+        
+        if player.current_room.name == "Métro désaffecté" and direction == "D":
+            if not any(item.name == "cle_lourde" for item in player.inventory):
+                print("\nLa salle est verrouillé. Il vous faut une clé d'accès.\n")
+                return False
+
+        if player.current_room.name == "Salle secrète du LYS":
+            print("\nVous découvrez la vérité sur l'affaire du LYS. L'enquête est terminée.\n")
+
+
         # Move the player in the direction specified by the parameter.
         if player.move(direction):
             # AJOUTER LA NOUVELLE SALLE DANS L'HISTORIQUE
