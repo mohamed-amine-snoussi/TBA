@@ -112,6 +112,12 @@ class Actions:
             if not any(item.name == "cle_lourde" for item in player.inventory):
                 print("\nLa salle est verrouillé. Il vous faut une clé d'accès.\n")
                 return False
+            # Vérifier que les quêtes prérequises sont complétées
+            quest1 = game.quest_manager.get_quest("collecter_preuves")
+            quest2 = game.quest_manager.get_quest("interroger_suspects")
+            if not (quest1 and quest1.is_completed()) or not (quest2 and quest2.is_completed()):
+                print("\nVous n'avez pas rassemblé assez d'informations. Vous devez d'abord collecter toutes les preuves et interroger tous les suspects.\n")
+                return False
 
         if player.current_room.name == "Salle secrète du LYS":
             print("\nVous découvrez la vérité sur l'affaire du LYS. L'enquête est terminée.\n")
