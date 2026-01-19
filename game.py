@@ -10,6 +10,7 @@ from command import Command
 from actions import Actions
 from item import Item
 from character import Character
+from quest import Quest, QuestManager
 
 class Game:
 
@@ -19,7 +20,8 @@ class Game:
         self.rooms = []
         self.commands = {}
         self.player = None
-        self.history = []   
+        self.history = []
+        self.quest_manager = None
     
     # Setup the game
     def setup(self):
@@ -48,6 +50,14 @@ class Game:
         self.commands["check"] = check
         talk = Command("talk", " <personne> : parler à un personnage", Actions.talk, 1)
         self.commands["talk"] = talk
+        quests = Command("quests", " : lister toutes les quêtes", Actions.quests, 0)
+        self.commands["quests"] = quests
+        quest = Command("quest", " <nom> : détails d'une quête", Actions.quest, 1)
+        self.commands["quest"] = quest
+        activate = Command("activate", " <nom> : activer une quête", Actions.activate, 1)
+        self.commands["activate"] = activate
+        rewards = Command("rewards", " : lister vos récompenses", Actions.rewards, 0)
+        self.commands["rewards"] = rewards
 
         
 
@@ -141,6 +151,16 @@ class Game:
         self.player.current_room = poste
         self.history.append(self.player.current_room)
 
+        self.quest_manager = QuestManager(self.player)
+
+        # Setup quests
+        quest1 = Quest("collecter_preuves", "Rassembler les indices sur l'affaire du LYS : badge, dossier, photo, carte, dictaphone, cle_lourde, temoignage, dossier_archives, disque_dur.", ["badge", "dossier", "photo", "carte", "dictaphone", "cle_lourde", "temoignage", "dossier_archives", "disque_dur"], ["Accès aux zones secrètes", "Indices rassemblés"], self.quest_manager)
+        self.quest_manager.add_quest(quest1)
+        quest2 = Quest("interroger_suspects", "Parler aux personnages clés : Témoin, Archiviste, Technicien.", ["temoin", "archiviste", "technicien"], ["Informations cruciales"], self.quest_manager)
+        self.quest_manager.add_quest(quest2)
+        quest3 = Quest("resoudre_enigme", "Atteindre la salle secrète et découvrir la vérité sur le crime.", ["salle_secrete"], ["Victoire sur l'affaire du LYS"], self.quest_manager)
+        self.quest_manager.add_quest(quest3)
+
 
     # Play the game
     def play(self):
@@ -150,6 +170,12 @@ class Game:
         while not self.finished:
             # Get the command from the player
             self.process_command(input("> "))
+            if self.win():
+                print(f"\nFélicitations {self.player.name}, vous avez résolu l'affaire du LYS !")
+                self.finished = True
+            elif self.loose():
+                print(f"\nVous avez échoué {self.player.name}. Vous êtes entré dans la salle secrète sans préparation.")
+                self.finished = True
         return None
 
     # Process the command entered by the player
@@ -172,6 +198,15 @@ class Game:
         for room in self.rooms:
             for character in room.characters[:]:
                 character.move(debug=DEBUG)
+
+    def win(self):
+        """Vérifie si le joueur a gagné."""
+        return all(quest.is_completed() for quest in self.quest_manager.list_quests())
+
+    def loose(self):
+        """Vérifie si le joueur a perdu."""
+        # Désactivé pour éviter les conflits avec la victoire
+        return False
 
     # Print the welcome message
     def print_welcome(self):

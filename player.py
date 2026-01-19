@@ -22,6 +22,7 @@ class Player():
         self.name = name
         self.current_room = None
         self.inventory = []
+        self.rewards = []
     
     # Define the move method.
     def move(self, direction):
@@ -37,5 +38,19 @@ class Player():
         self.current_room = next_room
         print(self.current_room.get_long_description())
         return True
+
+    def add_reward(self, reward):
+        """Ajoute une récompense au joueur."""
+        self.rewards.append(reward)
+
+    def show_rewards(self):
+        """Affiche les récompenses du joueur."""
+        if not self.rewards:
+            print("\nVous n'avez aucune récompense.\n")
+        else:
+            print("\nVos récompenses:")
+            for reward in self.rewards:
+                print(f"- {reward}")
+            print()
 
     

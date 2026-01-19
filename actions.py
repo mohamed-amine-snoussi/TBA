@@ -121,6 +121,9 @@ class Actions:
         if player.move(direction):
             # AJOUTER LA NOUVELLE SALLE DANS L'HISTORIQUE
             game.history.append(player.current_room)
+            # Check quest objectives
+            if player.current_room.name == "Salle secrète du LYS":
+                game.quest_manager.complete_objective("resoudre_enigme", "salle_secrete")
             return True
         return False
 
@@ -261,6 +264,8 @@ class Actions:
                 game.player.inventory.append(item)
                 room.items.remove(item)
                 print(f"\nVous avez ramassé : {item.name}\n")
+                # Check quest objectives
+                game.quest_manager.complete_objective("collecter_preuves", item_name)
                 return True
 
         print(f"\nL'objet '{item_name}' n'est pas dans la pièce.\n")
@@ -360,8 +365,91 @@ class Actions:
         for character in room.characters:
             if character.name.lower() == character_name.lower():
                 print("\n" + character.talk() + "\n")
+                # Check quest objectives
+                if character.name == "Témoin":
+                    game.quest_manager.complete_objective("interroger_suspects", "temoin")
+                elif character.name == "Archiviste":
+                    game.quest_manager.complete_objective("interroger_suspects", "archiviste")
+                elif character.name == "Technicien":
+                    game.quest_manager.complete_objective("interroger_suspects", "technicien")
                 return True
 
         print(f"\nIl n'y a personne nommé '{character_name}' ici.\n")
         return False
+
+    def quests(game, list_of_words, number_of_parameters):
+        """
+        List all quests.
+        """
+        if len(list_of_words) != 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+
+        quests = game.quest_manager.list_quests()
+        if not quests:
+            print("\nAucune quête disponible.\n")
+            return True
+
+        print("\nQuêtes disponibles:")
+        for quest in quests:
+            print(f"- {quest}")
+        print()
+        return True
+
+    def quest(game, list_of_words, number_of_parameters):
+        """
+        Show details of a specific quest.
+        """
+        if len(list_of_words) != 2:
+            command_word = list_of_words[0]
+            print(MSG1.format(command_word=command_word))
+            return False
+
+        quest_name = list_of_words[1]
+        quest = game.quest_manager.get_quest(quest_name)
+        if not quest:
+            print(f"\nQuête '{quest_name}' introuvable.\n")
+            return False
+
+        print(f"\n{quest.name}: {quest.description}")
+        print(f"Statut: {quest.get_status()}")
+        print(f"Objectifs: {', '.join(quest.objectives)}")
+        print(f"Récompenses: {', '.join(quest.rewards)}\n")
+        return True
+
+    def activate(game, list_of_words, number_of_parameters):
+        """
+        Activate a quest.
+        """
+        if len(list_of_words) != 2:
+            command_word = list_of_words[0]
+            print(MSG1.format(command_word=command_word))
+            return False
+
+        quest_name = list_of_words[1]
+        quest = game.quest_manager.get_quest(quest_name)
+        if not quest:
+            print(f"\nQuête '{quest_name}' introuvable.\n")
+            return False
+
+        if quest.active:
+            print(f"\nQuête '{quest_name}' déjà activée.\n")
+            return False
+
+        quest.activate()
+        print(f"\nQuête '{quest_name}' activée.\n")
+        return True
+
+    def rewards(game, list_of_words, number_of_parameters):
+        """
+        Show player's rewards.
+        """
+        if len(list_of_words) != 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+
+        game.player.show_rewards()
+        return True
 
