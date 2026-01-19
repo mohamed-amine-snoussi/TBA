@@ -16,9 +16,24 @@ class Character:
         room.characters.append(self)
 
     def talk(self):
-        message = self.dialogues[self.current_dialogue]
-        self.current_dialogue = (self.current_dialogue + 1) % len(self.dialogues)
-        return message
+        # Utiliser get_msg() pour récupérer le message suivant
+        return self.get_msg()
+
+    def get_msg(self):
+        """
+        Retourne le message suivant du PNJ.
+
+        Comportement: on prend le premier message de la liste `dialogues`, on
+        le supprime et on le remet en fin de liste pour obtenir un affichage
+        cyclique des répliques lors des appels successifs.
+        """
+        if not self.dialogues:
+            return ""
+
+        msg = self.dialogues.pop(0)
+        # remettre le message à la fin pour garder un cycle
+        self.dialogues.append(msg)
+        return msg
 
     def move(self, debug=False):
         """

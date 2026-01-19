@@ -1,12 +1,15 @@
 # Description: Game class
 
 # Import modules
+DEBUG = False
+
 
 from room import Room
 from player import Player
 from command import Command
 from actions import Actions
 from item import Item
+from character import Character
 
 class Game:
 
@@ -43,7 +46,8 @@ class Game:
         self.commands["look"] = look
         check = Command("check", " : afficher l'inventaire", Actions.check, 0)
         self.commands["check"] = check
-
+        talk = Command("talk", " <personne> : parler à un personnage", Actions.talk, 1)
+        self.commands["talk"] = talk
 
         
 
@@ -72,6 +76,21 @@ class Game:
         self.rooms.append(archives)
         local_tech = Room("Local technique du métro","une pièce étroite remplie de câbles, de plans et de coffres métalliques.")
         self.rooms.append(local_tech)
+
+        temoin = Character("Témoin","Un homme nerveux qui semble cacher quelque chose.",interrogatoire,[
+        "J'ai vu des gens avec un symbole de lys entrer dans l'hôtel tard le soir...",
+        "Ils avaient l'air pressés. Comme s'ils fuyaient quelqu'un.",
+        "Je ne veux pas d'ennuis... mais la Place du Lys cache quelque chose."])
+
+        archiviste = Character("Archiviste","Une employée fatiguée mais curieuse.",archives,[
+        "Ces dossiers... le LYS revient dans les archives depuis des décennies.",
+        "On a déjà essayé d'enterrer cette affaire. Plusieurs fois.",
+        "Si vous cherchez une entrée, regardez du côté du métro désaffecté."])
+
+        technicien = Character("Technicien","Un ancien agent du métro au regard méfiant.",local_tech,[
+        "Le local technique ? Il est verrouillé pour une bonne raison.",
+        "Sans plan d'accès, impossible d'entrer. La carte est essentielle.",
+        "Une clé lourde ouvre une grille... mais je ne dis pas laquelle."])
 
 
         #setup items
@@ -150,6 +169,9 @@ class Game:
         else:
             command = self.commands[command_word]
             command.action(self, list_of_words, command.number_of_parameters)
+        for room in self.rooms:
+            for character in room.characters[:]:
+                character.move(debug=DEBUG)
 
     # Print the welcome message
     def print_welcome(self):

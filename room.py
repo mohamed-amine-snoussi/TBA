@@ -30,6 +30,7 @@ class Room:
         self.description = description
         self.exits = {}
         self.items = []
+        self.characters = []
     
     # Define the get_exit method.
     def get_exit(self, direction):
@@ -52,5 +53,7 @@ class Room:
     # Return a long description of this room including exits.
     def get_long_description(self):
         desc = f"\nVous êtes dans {self.description}\n"
+        # Ne pas lister automatiquement les personnages ici :
+        # ils seront affichés uniquement via la commande `look`.
         desc += f"\n{self.get_exit_string()}\n"
         return desc

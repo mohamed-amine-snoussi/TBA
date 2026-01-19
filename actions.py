@@ -303,20 +303,33 @@ class Actions:
 
     def look(game, list_of_words, number_of_parameters):
         if len(list_of_words) != 1:
-            print(MSG0.format(command_word="look"))
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
             return False
 
         room = game.player.current_room
 
-        if not room.items:
+        if not room.items and not room.characters:
             print("\nIl n'y a rien ici.\n")
             return True
 
         print("\nOn voit:")
-        for item in room.items:
-            print(f"\t- {item}")
+
+        # Affichage des objets
+        if room.items:
+            print("\nObjets présents :")
+            for item in room.items:
+                print(f"\t- {item}")
+
+        # Affichage des personnages
+        if room.characters:
+            print("\nPersonnes présentes :")
+            for character in room.characters:
+                print(f"\t- {character.name} : {character.description}")
+
         print()
         return True
+
     
     def check(game, list_of_words, number_of_parameters):
         if len(list_of_words) != 1:
@@ -334,4 +347,21 @@ class Actions:
             print(f"\t- {item}")
         print()
         return True
+    
+    def talk(game, list_of_words, number_of_parameters):
+        if len(list_of_words) != 2:
+            command_word = list_of_words[0]
+            print(MSG1.format(command_word=command_word))
+            return False
+
+        character_name = list_of_words[1]
+        room = game.player.current_room
+
+        for character in room.characters:
+            if character.name.lower() == character_name.lower():
+                print("\n" + character.talk() + "\n")
+                return True
+
+        print(f"\nIl n'y a personne nommé '{character_name}' ici.\n")
+        return False
 
