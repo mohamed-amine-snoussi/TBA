@@ -26,7 +26,10 @@ class Quest:
             print(f"Quête '{self.name}' complétée !")
             for reward in self.rewards:
                 self.manager.player.add_reward(reward)
-            print(f"Récompenses obtenues: {', '.join(self.rewards)}")
+            if self.name == "recuperer_disque_dur":
+                print(f"Récompenses obtenues : {', '.join(self.rewards)}")
+            else:
+                print(f"Récompenses obtenues: {', '.join(self.rewards)}")
 
     def is_completed(self):
         """Vérifie si tous les objectifs sont complétés."""
