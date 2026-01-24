@@ -98,16 +98,19 @@ class Game:
         "J'ai vu des gens avec un symbole de lys entrer dans l'hôtel tard le soir...",
         "Ils avaient l'air pressés. Comme s'ils fuyaient quelqu'un.",
         "Je ne veux pas d'ennuis... mais la Place du Lys cache quelque chose."])
+        interrogatoire.characters.append(temoin)
 
         archiviste = Character("Archiviste","Une employée fatiguée mais curieuse.",archives,[
         "Ces dossiers... le LYS revient dans les archives depuis des décennies.",
         "On a déjà essayé d'enterrer cette affaire. Plusieurs fois.",
         "Si vous cherchez une entrée, regardez du côté du métro désaffecté."])
+        archives.characters.append(archiviste)
 
         technicien = Character("Technicien","Un ancien agent du métro au regard méfiant.",local_tech,[
         "Le local technique ? Il est verrouillé pour une bonne raison.",
         "Sans plan d'accès, impossible d'entrer. La carte est essentielle.",
         "Une clé lourde ouvre une grille... mais je ne dis pas laquelle."])
+        local_tech.characters.append(technicien)
 
 
         #setup items
@@ -481,13 +484,21 @@ def main():
     if '--cli' in args:
         Game().play()
         return
+    
+    # Try to use the enhanced GUI first
     try:
-        app = GameGUI()
+        from game_gui_enhanced import GameGUIEnhanced
+        app = GameGUIEnhanced()
         app.mainloop()
-    except tk.TclError as e:
-        # Fallback to CLI if GUI fails (e.g., no DISPLAY, Tkinter not available)
-        print(f"GUI indisponible ({e}). Passage en mode console.")
-        Game().play()
+    except (ImportError, tk.TclError) as e:
+        # Fallback to standard GUI
+        try:
+            app = GameGUI()
+            app.mainloop()
+        except tk.TclError as e:
+            # Fallback to CLI if GUI fails (e.g., no DISPLAY, Tkinter not available)
+            print(f"GUI indisponible ({e}). Passage en mode console.")
+            Game().play()
     
 
 if __name__ == "__main__":
