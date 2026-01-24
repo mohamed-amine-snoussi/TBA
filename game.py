@@ -2,7 +2,12 @@
 
 # Import modules
 DEBUG = False
+from pathlib import Path
+import sys
 
+# Tkinter imports for GUI
+import tkinter as tk
+from tkinter import ttk, simpledialog
 
 from room import Room
 from player import Player
@@ -24,7 +29,9 @@ class Game:
         self.quest_manager = None
     
     # Setup the game
-    def setup(self):
+    def setup(self, player_name=None):
+
+        # Setup commands
 
         # Setup commands
 
@@ -147,7 +154,9 @@ class Game:
 
         # Setup player and starting room
 
-        self.player = Player(input("\nEntrez votre nom: "))
+        if player_name is None:
+            player_name = input("\nEntrez votre nom: ")
+        self.player = Player(player_name)
         self.player.current_room = poste
         self.history.append(self.player.current_room)
 
@@ -222,9 +231,233 @@ class Game:
         print(self.player.current_room.get_long_description())
     
 
+class _StdoutRedirector:
+    """Redirect stdout to a Tkinter Text widget."""
+
+    def __init__(self, text_widget):
+        self.text_widget = text_widget
+        self.original_stdout = sys.stdout
+
+    def write(self, string):
+        """Write to the text widget instead of stdout."""
+        self.text_widget.insert(tk.END, string)
+        self.text_widget.see(tk.END)  # Auto-scroll to end
+
+    def flush(self):
+        """Required for file-like objects."""
+        pass
+
+
+class GameGUI(tk.Tk):
+    """Main GUI class for the game."""
+
+    IMAGE_WIDTH = 400
+    IMAGE_HEIGHT = 300
+
+    def __init__(self):
+        super().__init__()
+        self.title("Jeu d'Aventure - L'Affaire du LYS")
+        self.geometry("800x600")
+        self.resizable(True, True)
+
+        # Initialize game
+        player_name = simpledialog.askstring("Nom du joueur", "Entrez votre nom:")
+        if not player_name:
+            player_name = "Joueur"
+        self.game = Game()
+        self.game.setup(player_name)
+
+        # Redirect stdout to GUI
+        self.original_stdout = sys.stdout
+        sys.stdout = _StdoutRedirector(self._create_output_area())
+
+        # Setup GUI
+        self._setup_gui()
+
+        # Print welcome message
+        self.game.print_welcome()
+
+    def _create_output_area(self):
+        """Create and return the output text area."""
+        # L0 Output area
+        output_frame = ttk.Frame(self)
+        output_frame.grid(row=0, column=0, sticky="nsew", padx=6, pady=(6,3))
+        output_frame.grid_rowconfigure(0, weight=1)
+        output_frame.grid_columnconfigure(0, weight=1)
+
+        text = tk.Text(output_frame, wrap=tk.WORD, state=tk.NORMAL)
+        text.grid(row=0, column=0, sticky="nsew")
+
+        # Add scrollbar
+        scrollbar = ttk.Scrollbar(output_frame, orient=tk.VERTICAL, command=text.yview)
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        text.config(yscrollcommand=scrollbar.set)
+
+        return text
+
+    def _setup_gui(self):
+        """Setup the GUI layout."""
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        # L0 Output area (already created in _create_output_area)
+
+        # L1 Image and buttons area
+        image_buttons_frame = ttk.Frame(self)
+        image_buttons_frame.grid(row=1, column=0, sticky="ew", padx=6, pady=3)
+        image_buttons_frame.grid_columnconfigure(0, weight=1)
+
+        # Image canvas
+        self.canvas = tk.Canvas(image_buttons_frame, width=self.IMAGE_WIDTH, height=self.IMAGE_HEIGHT, bg="black")
+        self.canvas.grid(row=0, column=0, sticky="ew")
+
+        # Buttons frame
+        buttons_frame = ttk.Frame(image_buttons_frame)
+        buttons_frame.grid(row=1, column=0, sticky="ew", pady=(6,0))
+
+        # Create buttons for common commands
+        self._create_buttons(buttons_frame)
+
+        # L2 Entry area
+        entry_frame = ttk.Frame(self)
+        entry_frame.grid(row=2, column=0, sticky="ew", padx=6, pady=(3,6))
+        entry_frame.grid_columnconfigure(0, weight=1)
+
+        self.entry_var = tk.StringVar()
+        self.entry = ttk.Entry(entry_frame, textvariable=self.entry_var)
+        self.entry.grid(row=0, column=0, sticky="ew")
+        self.entry.bind("<Return>", self._on_enter)
+        self.entry.focus_set()
+
+        # Update initial room image
+        self._update_room_image()
+
+    def _create_buttons(self, parent):
+        """Create buttons for common commands."""
+        assets_dir = Path(__file__).parent / 'assets'
+
+        # Row 0: Help, Quit, Inventory, Look
+        buttons_row0 = [
+            ('help-50.png', 'help', "Help"),
+            ('quit-50.png', 'quit', "Quit"),
+            (None, 'inventory', "Inventory"),
+            (None, 'look', "Look")
+        ]
+
+        for i, (img_name, cmd, text) in enumerate(buttons_row0):
+            try:
+                if img_name:
+                    img = tk.PhotoImage(file=str(assets_dir / img_name))
+                    btn = ttk.Button(parent, image=img, command=lambda c=cmd: self._send_command(c))
+                    btn.image = img  # Keep reference
+                else:
+                    btn = ttk.Button(parent, text=text, command=lambda c=cmd: self._send_command(c))
+                btn.grid(row=0, column=i, padx=2)
+            except (FileNotFoundError, tk.TclError):
+                btn = ttk.Button(parent, text=text, command=lambda c=cmd: self._send_command(c))
+                btn.grid(row=0, column=i, padx=2)
+
+        # Row 1-2: Direction buttons
+        directions = [
+            ('up-arrow-50.png', 'go n', 1, 2),
+            ('right-arrow-50.png', 'go e', 2, 3),
+            ('down-arrow-50.png', 'go s', 3, 2),
+            ('left-arrow-50.png', 'go o', 2, 1)
+        ]
+
+        for img_name, cmd, row, col in directions:
+            try:
+                img = tk.PhotoImage(file=str(assets_dir / img_name))
+                btn = ttk.Button(parent, image=img, command=lambda c=cmd: self._send_command(c))
+                btn.image = img  # Keep reference
+                btn.grid(row=row, column=col, padx=2)
+            except (FileNotFoundError, tk.TclError):
+                direction_name = cmd.split()[-1].upper()
+                btn = ttk.Button(parent, text=direction_name, command=lambda c=cmd: self._send_command(c))
+                btn.grid(row=row, column=col, padx=2)
+
+        # Row 4: Other commands
+        other_commands = [
+            (None, 'quests', "Quests"),
+            (None, 'rewards', "Rewards"),
+            (None, 'check', "Check")
+        ]
+
+        for i, (img_name, cmd, text) in enumerate(other_commands):
+            btn = ttk.Button(parent, text=text, command=lambda c=cmd: self._send_command(c))
+            btn.grid(row=4, column=i, padx=2)
+
+    def _update_room_image(self):
+        """Update the canvas image based on the current room."""
+        if not self.game.player or not self.game.player.current_room:
+            return
+
+        room = self.game.player.current_room
+        assets_dir = Path(__file__).parent / 'assets'
+
+        # For now, use a fallback since we don't have room-specific images
+        image_path = assets_dir / 'scene.png'
+
+        try:
+            # Load new image
+            self._image_ref = tk.PhotoImage(file=str(image_path))
+            # Clear canvas and redraw image
+            self.canvas.delete("all")
+            self.canvas.create_image(
+                self.IMAGE_WIDTH/2,
+                self.IMAGE_HEIGHT/2,
+                image=self._image_ref
+            )
+        except (FileNotFoundError, tk.TclError):
+            # Fallback to text if image not found or cannot be loaded
+            self.canvas.delete("all")
+            self.canvas.create_text(
+                self.IMAGE_WIDTH/2,
+                self.IMAGE_HEIGHT/2,
+                text=f"{room.name}",
+                fill="white",
+                font=("Helvetica", 18)
+            )
+
+    def _on_enter(self, _event=None):
+        """Handle Enter key press in the entry field."""
+        value = self.entry_var.get().strip()
+        if value:
+            self._send_command(value)
+        self.entry_var.set("")
+
+    def _send_command(self, command):
+        if self.game.finished:
+            return
+        # Echo the command in output area
+        print(f"> {command}\n")
+        self.game.process_command(command)
+        # Update room image after command (in case player moved)
+        self._update_room_image()
+        if self.game.finished:
+            # Disable further input and schedule close (brief delay to show farewell)
+            self.entry.configure(state="disabled")
+            self.after(600, self._on_close)
+
+    def _on_close(self):
+        # Restore stdout and destroy window
+        sys.stdout = self.original_stdout
+        self.destroy()
+
+
 def main():
     # Create a game object and play the game
-    Game().play()
+    args = sys.argv[1:]
+    if '--cli' in args:
+        Game().play()
+        return
+    try:
+        app = GameGUI()
+        app.mainloop()
+    except tk.TclError as e:
+        # Fallback to CLI if GUI fails (e.g., no DISPLAY, Tkinter not available)
+        print(f"GUI indisponible ({e}). Passage en mode console.")
+        Game().play()
     
 
 if __name__ == "__main__":
