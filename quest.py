@@ -5,7 +5,7 @@ class Quest:
     Une quête a un nom, une description, une liste d'objectifs et des récompenses.
     """
 
-    def __init__(self, name, description, objectives, rewards, manager):
+    def __init__(self, name, description, objectives, rewards, manager, prerequisites=None):
         self.name = name
         self.description = description
         self.objectives = objectives  # list of objectives
@@ -13,10 +13,22 @@ class Quest:
         self.active = False
         self.completed_objectives = set()
         self.manager = manager
+        self.prerequisites = prerequisites or []  # list of quest names that must be completed
 
     def activate(self):
-        """Active la quête."""
-        self.active = True
+        """Active la quête si les prérequis sont remplis."""
+        if self.can_activate():
+            self.active = True
+        else:
+            print(f"Impossible d'activer la quête '{self.name}' : prérequis non remplis.")
+
+    def can_activate(self):
+        """Vérifie si les prérequis sont remplis."""
+        for prereq in self.prerequisites:
+            quest = self.manager.get_quest(prereq)
+            if not quest or not quest.is_completed():
+                return False
+        return True
 
     def complete_objective(self, objective):
         """Marque un objectif comme complété."""
@@ -30,6 +42,8 @@ class Quest:
                 print(f"Récompenses obtenues : {', '.join(self.rewards)}")
             else:
                 print(f"Récompenses obtenues: {', '.join(self.rewards)}")
+            # Activer les quêtes disponibles après avoir complété celle-ci
+            self.manager.check_and_activate_quests()
 
     def is_completed(self):
         """Vérifie si tous les objectifs sont complétés."""
@@ -79,6 +93,13 @@ class QuestManager:
         """Retourne les quêtes actives."""
         return [q for q in self.quests.values() if q.active]
 
-    def get_completed_quests(self):
-        """Retourne les quêtes complétées."""
-        return [q for q in self.quests.values() if q.is_completed()]
+    def get_available_quests(self):
+        """Retourne les quêtes disponibles à l'activation."""
+        return [q for q in self.quests.values() if not q.active and q.can_activate()]
+
+    def check_and_activate_quests(self):
+        """Vérifie et active les quêtes disponibles."""
+        for quest in self.quests.values():
+            if not quest.active and quest.can_activate():
+                quest.activate()
+                print(f"Nouvelle quête disponible : {quest.name}")

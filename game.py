@@ -54,7 +54,7 @@ class Game:
         self.commands["quests"] = quests
         quest = Command("quest", " <nom> : détails d'une quête", Actions.quest, 1)
         self.commands["quest"] = quest
-        activate = Command("activate", " <nom> : activer une quête", Actions.activate, 1)
+        activate = Command("activate", " <nom> ou 'quests' : activer une quête spécifique ou toutes les quêtes disponibles", Actions.activate, 1)
         self.commands["activate"] = activate
         rewards = Command("rewards", " : lister vos récompenses", Actions.rewards, 0)
         self.commands["rewards"] = rewards
@@ -154,12 +154,17 @@ class Game:
         self.quest_manager = QuestManager(self.player)
 
         # Setup quests
-        quest1 = Quest("collecter_preuves", "Rassembler les indices sur l'affaire du LYS : badge, dossier, photo, carte, dictaphone, cle_lourde, temoignage, dossier_archives, disque_dur.", ["badge", "dossier", "photo", "carte", "dictaphone", "cle_lourde", "temoignage", "dossier_archives", "disque_dur"], ["Accès aux zones secrètes", "Indices rassemblés"], self.quest_manager)
+        quest1 = Quest("collecter_preuves", "Rassembler les 8 indices sur l'affaire du LYS : badge, dossier, photo, carte, dictaphone, cle_lourde, temoignage, dossier_archives.", ["badge", "dossier", "photo", "carte", "dictaphone", "cle_lourde", "temoignage", "dossier_archives"], ["Indices rassemblés"], self.quest_manager)
         self.quest_manager.add_quest(quest1)
-        quest2 = Quest("interroger_suspects", "Parler aux personnages clés : Témoin, Archiviste, Technicien.", ["temoin", "archiviste", "technicien"], ["Informations cruciales"], self.quest_manager)
+        quest2 = Quest("interroger_suspects", "Parler aux 3 personnages clés : Témoin, Archiviste, Technicien.", ["temoin", "archiviste", "technicien"], ["Informations cruciales"], self.quest_manager)
         self.quest_manager.add_quest(quest2)
-        quest3 = Quest("resoudre_enigme", "Atteindre la salle secrète et découvrir la vérité sur le crime.", ["salle_secrete"], ["Victoire sur l'affaire du LYS"], self.quest_manager)
+        quest3 = Quest("acces_salle_secrete", "Accéder à la salle secrète du LYS.", ["salle_secrete"], ["Accès aux zones secrètes"], self.quest_manager, ["collecter_preuves", "interroger_suspects"])
         self.quest_manager.add_quest(quest3)
+        quest4 = Quest("recuperer_disque_dur", "Récupérer le disque dur chiffré dans la salle secrète.", ["disque_dur"], ["Victoire sur l'affaire du LYS"], self.quest_manager, ["acces_salle_secrete"])
+        self.quest_manager.add_quest(quest4)
+
+        # Activer les quêtes sans prérequis
+        self.quest_manager.check_and_activate_quests()
 
 
     # Play the game
@@ -201,7 +206,8 @@ class Game:
 
     def win(self):
         """Vérifie si le joueur a gagné."""
-        return all(quest.is_completed() for quest in self.quest_manager.list_quests())
+        quest = self.quest_manager.get_quest("recuperer_disque_dur")
+        return quest and quest.is_completed()
 
     def loose(self):
         """Vérifie si le joueur a perdu."""

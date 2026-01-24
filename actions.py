@@ -123,7 +123,7 @@ class Actions:
             game.history.append(player.current_room)
             # Check quest objectives
             if player.current_room.name == "Salle secrète du LYS":
-                game.quest_manager.complete_objective("resoudre_enigme", "salle_secrete")
+                game.quest_manager.complete_objective("acces_salle_secrete", "salle_secrete")
             return True
         return False
 
@@ -265,7 +265,10 @@ class Actions:
                 room.items.remove(item)
                 print(f"\nVous avez ramassé : {item.name}\n")
                 # Check quest objectives
-                game.quest_manager.complete_objective("collecter_preuves", item_name)
+                if item_name == "disque_dur":
+                    game.quest_manager.complete_objective("recuperer_disque_dur", item_name)
+                else:
+                    game.quest_manager.complete_objective("collecter_preuves", item_name)
                 return True
 
         print(f"\nL'objet '{item_name}' n'est pas dans la pièce.\n")
@@ -420,7 +423,7 @@ class Actions:
 
     def activate(game, list_of_words, number_of_parameters):
         """
-        Activate a quest.
+        Activate a quest or all available quests.
         """
         if len(list_of_words) != 2:
             command_word = list_of_words[0]
@@ -428,18 +431,30 @@ class Actions:
             return False
 
         quest_name = list_of_words[1]
-        quest = game.quest_manager.get_quest(quest_name)
-        if not quest:
-            print(f"\nQuête '{quest_name}' introuvable.\n")
-            return False
+        if quest_name == "quests":
+            # Activate all available quests
+            available_quests = game.quest_manager.get_available_quests()
+            if not available_quests:
+                print("\nAucune quête disponible à activer.\n")
+                return False
+            for quest in available_quests:
+                quest.activate()
+                print(f"Quête '{quest.name}' activée.")
+            return True
+        else:
+            # Activate specific quest
+            quest = game.quest_manager.get_quest(quest_name)
+            if not quest:
+                print(f"\nQuête '{quest_name}' introuvable.\n")
+                return False
 
-        if quest.active:
-            print(f"\nQuête '{quest_name}' déjà activée.\n")
-            return False
+            if quest.active:
+                print(f"\nQuête '{quest_name}' déjà activée.\n")
+                return False
 
-        quest.activate()
-        print(f"\nQuête '{quest_name}' activée.\n")
-        return True
+            quest.activate()
+            print(f"\nQuête '{quest_name}' activée.\n")
+            return True
 
     def rewards(game, list_of_words, number_of_parameters):
         """
