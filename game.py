@@ -71,27 +71,27 @@ class Game:
         
         # Setup rooms
 
-        poste = Room("Poste de Police", "le hall du poste de police, rempli de dossiers et de cartes accrochées au mur.")
+        poste = Room("Poste de Police", "le hall du poste de police, rempli de dossiers et de cartes accrochées au mur.", "police.png")
         self.rooms.append(poste)
-        ruelle = Room("Ruelle du centre", "une ruelle étroite et sombre, encore marquée par des graffitis en forme de lys.")
+        ruelle = Room("Ruelle du centre", "une ruelle étroite et sombre, encore marquée par des graffitis en forme de lys.", "street.png")
         self.rooms.append(ruelle)
-        hotel = Room("Hôtel abandonné", "le hall décrépit d'un ancien hôtel, condamné depuis une affaire jamais élucidée.")
+        hotel = Room("Hôtel abandonné", "le hall décrépit d'un ancien hôtel, condamné depuis une affaire jamais élucidée.", "hotel.png")
         self.rooms.append(hotel)
-        toit = Room("Toit de l'immeuble", "le toit de l'immeuble, balayé par le vent, avec vue sur la ville.")
+        toit = Room("Toit de l'immeuble", "le toit de l'immeuble, balayé par le vent, avec vue sur la ville.", "roof.png")
         self.rooms.append(toit)
-        chambre = Room("Chambre 407", "une chambre en désordre où un crime lié au LYS a été commis.")
+        chambre = Room("Chambre 407", "une chambre en désordre où un crime lié au LYS a été commis.", "bedroom.png")
         self.rooms.append(chambre)
-        place = Room("Place du Lys", "une grande place dominée par une statue représentant un lys stylisé.")
+        place = Room("Place du Lys", "une grande place dominée par une statue représentant un lys stylisé.", "square.png")
         self.rooms.append(place)
-        metro = Room("Métro désaffecté", "un quai de métro abandonné, plongé dans la pénombre.")
+        metro = Room("Métro désaffecté", "un quai de métro abandonné, plongé dans la pénombre.", "metro.png")
         self.rooms.append(metro)
-        salle_secrete = Room("Salle secrète du LYS", "une salle cachée, remplie de dossiers brûlés et de symboles du LYS.")
+        salle_secrete = Room("Salle secrète du LYS", "une salle cachée, remplie de dossiers brûlés et de symboles du LYS.", "secret.png")
         self.rooms.append(salle_secrete)
-        interrogatoire = Room("Salle d'interrogatoire","une salle froide éclairée par un néon, avec une table métallique et un miroir sans tain.")
+        interrogatoire = Room("Salle d'interrogatoire","une salle froide éclairée par un néon, avec une table métallique et un miroir sans tain.", "interrogation.png")
         self.rooms.append(interrogatoire)
-        archives = Room("Archives municipales","une salle remplie d'étagères poussiéreuses contenant des dossiers très anciens.")
+        archives = Room("Archives municipales","une salle remplie d'étagères poussiéreuses contenant des dossiers très anciens.", "archives.png")
         self.rooms.append(archives)
-        local_tech = Room("Local technique du métro","une pièce étroite remplie de câbles, de plans et de coffres métalliques.")
+        local_tech = Room("Local technique du métro","une pièce étroite remplie de câbles, de plans et de coffres métalliques.", "technical.png")
         self.rooms.append(local_tech)
 
         temoin = Character("Témoin","Un homme nerveux qui semble cacher quelque chose.",interrogatoire,[
@@ -251,14 +251,20 @@ class _StdoutRedirector:
 class GameGUI(tk.Tk):
     """Main GUI class for the game."""
 
-    IMAGE_WIDTH = 400
-    IMAGE_HEIGHT = 300
+    IMAGE_WIDTH = 500
+    IMAGE_HEIGHT = 350
 
     def __init__(self):
         super().__init__()
         self.title("Jeu d'Aventure - L'Affaire du LYS")
-        self.geometry("800x600")
+        self.geometry("900x700")
         self.resizable(True, True)
+        # Style moderne
+        self.configure(bg='#2C3E50')
+        style = ttk.Style()
+        style.configure('TFrame', background='#2C3E50')
+        style.configure('TButton', font=('Helvetica', 10), padding=5)
+        style.configure('TLabel', background='#2C3E50', foreground='white')
 
         # Initialize game
         player_name = simpledialog.askstring("Nom du joueur", "Entrez votre nom:")
@@ -282,15 +288,20 @@ class GameGUI(tk.Tk):
         # L0 Output area
         output_frame = ttk.Frame(self)
         output_frame.grid(row=0, column=0, sticky="nsew", padx=6, pady=(6,3))
-        output_frame.grid_rowconfigure(0, weight=1)
+        output_frame.grid_rowconfigure(1, weight=1)
         output_frame.grid_columnconfigure(0, weight=1)
 
-        text = tk.Text(output_frame, wrap=tk.WORD, state=tk.NORMAL)
-        text.grid(row=0, column=0, sticky="nsew")
+        # Title for output area
+        output_title = ttk.Label(output_frame, text="Messages du jeu", font=('Helvetica', 12, 'bold'))
+        output_title.grid(row=0, column=0, pady=(0,5), sticky="w")
+
+        text = tk.Text(output_frame, wrap=tk.WORD, state=tk.NORMAL, bg='#1a1a1a', fg='white', 
+                      font=('Consolas', 10), relief="sunken", borderwidth=2)
+        text.grid(row=1, column=0, sticky="nsew")
 
         # Add scrollbar
         scrollbar = ttk.Scrollbar(output_frame, orient=tk.VERTICAL, command=text.yview)
-        scrollbar.grid(row=0, column=1, sticky="ns")
+        scrollbar.grid(row=1, column=1, sticky="ns")
         text.config(yscrollcommand=scrollbar.set)
 
         return text
@@ -307,13 +318,24 @@ class GameGUI(tk.Tk):
         image_buttons_frame.grid(row=1, column=0, sticky="ew", padx=6, pady=3)
         image_buttons_frame.grid_columnconfigure(0, weight=1)
 
-        # Image canvas
-        self.canvas = tk.Canvas(image_buttons_frame, width=self.IMAGE_WIDTH, height=self.IMAGE_HEIGHT, bg="black")
-        self.canvas.grid(row=0, column=0, sticky="ew")
+        # Image canvas with title
+        image_frame = ttk.Frame(image_buttons_frame)
+        image_frame.grid(row=0, column=0, pady=(0,10))
+        
+        # Title for the image area
+        title_label = ttk.Label(image_frame, text="Environnement actuel", font=('Helvetica', 14, 'bold'))
+        title_label.grid(row=0, column=0, pady=(0,5))
+        
+        self.canvas = tk.Canvas(image_frame, width=self.IMAGE_WIDTH, height=self.IMAGE_HEIGHT, bg="black", relief="sunken", borderwidth=2)
+        self.canvas.grid(row=1, column=0)
 
-        # Buttons frame
+        # Buttons frame with title
         buttons_frame = ttk.Frame(image_buttons_frame)
         buttons_frame.grid(row=1, column=0, sticky="ew", pady=(6,0))
+
+        # Title for buttons area
+        buttons_title = ttk.Label(buttons_frame, text="Actions disponibles", font=('Helvetica', 12, 'bold'))
+        buttons_title.grid(row=0, column=0, columnspan=6, pady=(0,10), sticky="w")
 
         # Create buttons for common commands
         self._create_buttons(buttons_frame)
@@ -336,10 +358,12 @@ class GameGUI(tk.Tk):
         """Create buttons for common commands."""
         assets_dir = Path(__file__).parent / 'assets'
 
-        # Row 0: Help, Quit, Inventory, Look
+        # Row 0: Help, Quit, Inventory, Look, Take, Drop
         buttons_row0 = [
             ('help-50.png', 'help', "Help"),
             ('quit-50.png', 'quit', "Quit"),
+            ('take-50.png', 'take', "Take"),
+            ('drop-50.png', 'drop', "Drop"),
             (None, 'inventory', "Inventory"),
             (None, 'look', "Look")
         ]
@@ -352,17 +376,17 @@ class GameGUI(tk.Tk):
                     btn.image = img  # Keep reference
                 else:
                     btn = ttk.Button(parent, text=text, command=lambda c=cmd: self._send_command(c))
-                btn.grid(row=0, column=i, padx=2)
+                btn.grid(row=1, column=i, padx=2)
             except (FileNotFoundError, tk.TclError):
                 btn = ttk.Button(parent, text=text, command=lambda c=cmd: self._send_command(c))
-                btn.grid(row=0, column=i, padx=2)
+                btn.grid(row=1, column=i, padx=2)
 
-        # Row 1-2: Direction buttons
+        # Row 2-3: Direction buttons
         directions = [
-            ('up-arrow-50.png', 'go n', 1, 2),
-            ('right-arrow-50.png', 'go e', 2, 3),
-            ('down-arrow-50.png', 'go s', 3, 2),
-            ('left-arrow-50.png', 'go o', 2, 1)
+            ('up-arrow-50.png', 'go n', 2, 3),
+            ('right-arrow-50.png', 'go e', 3, 4),
+            ('down-arrow-50.png', 'go s', 4, 3),
+            ('left-arrow-50.png', 'go o', 3, 2)
         ]
 
         for img_name, cmd, row, col in directions:
@@ -376,8 +400,9 @@ class GameGUI(tk.Tk):
                 btn = ttk.Button(parent, text=direction_name, command=lambda c=cmd: self._send_command(c))
                 btn.grid(row=row, column=col, padx=2)
 
-        # Row 4: Other commands
+        # Row 5: Talk, Quests, Rewards, Check
         other_commands = [
+            (None, 'talk', "Talk"),
             (None, 'quests', "Quests"),
             (None, 'rewards', "Rewards"),
             (None, 'check', "Check")
@@ -385,7 +410,7 @@ class GameGUI(tk.Tk):
 
         for i, (img_name, cmd, text) in enumerate(other_commands):
             btn = ttk.Button(parent, text=text, command=lambda c=cmd: self._send_command(c))
-            btn.grid(row=4, column=i, padx=2)
+            btn.grid(row=5, column=i, padx=2)
 
     def _update_room_image(self):
         """Update the canvas image based on the current room."""
@@ -395,8 +420,11 @@ class GameGUI(tk.Tk):
         room = self.game.player.current_room
         assets_dir = Path(__file__).parent / 'assets'
 
-        # For now, use a fallback since we don't have room-specific images
-        image_path = assets_dir / 'scene.png'
+        # Use room-specific image if available, otherwise fallback
+        if room.image:
+            image_path = assets_dir / room.image
+        else:
+            image_path = assets_dir / 'scene.png'
 
         try:
             # Load new image
@@ -414,9 +442,11 @@ class GameGUI(tk.Tk):
             self.canvas.create_text(
                 self.IMAGE_WIDTH/2,
                 self.IMAGE_HEIGHT/2,
-                text=f"{room.name}",
+                text=f"{room.name}\n\n{room.description[:100]}...",
                 fill="white",
-                font=("Helvetica", 18)
+                font=("Helvetica", 12),
+                justify="center",
+                width=self.IMAGE_WIDTH-20
             )
 
     def _on_enter(self, _event=None):

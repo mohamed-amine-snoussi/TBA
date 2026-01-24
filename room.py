@@ -25,9 +25,10 @@ class Room:
         Retourne une description complète du lieu incluant les sorties."""
 
     # Define the constructor. 
-    def __init__(self, name, description):
+    def __init__(self, name, description, image=None):
         self.name = name
         self.description = description
+        self.image = image  # Nom du fichier image associé à la salle
         self.exits = {}
         self.items = []
         self.characters = []
