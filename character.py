@@ -5,12 +5,13 @@ class Character:
     Représente un personnage non joueur (PNJ).
     """
 
-    def __init__(self, name, description, room, dialogues):
+    def __init__(self, name, description, room, dialogues, is_static=False):
         self.name = name
         self.description = description
         self.dialogues = dialogues
         self.current_dialogue = 0
         self.room = room
+        self.is_static = is_static
 
         # On place automatiquement le personnage dans la salle
         room.characters.append(self)
@@ -41,6 +42,10 @@ class Character:
         Va dans une pièce adjacente au hasard.
         Retourne True si déplacement, False sinon.
         """
+        if self.is_static:
+            if debug:
+                print(f"DEBUG: {self.name} est statique et reste dans {self.room.name}")
+            return False
 
         # 1 chance sur 2 de rester
         if random.choice([True, False]) is False:

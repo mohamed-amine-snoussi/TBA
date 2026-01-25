@@ -115,7 +115,7 @@ class Game:
         homme_mysterieux = Character("Homme_Mysterieux","Un homme en long manteau noir, le visage dissimulé dans l'ombre. Son regard vous glace le sang.",ruelle,[
         "Vous n'auriez pas dû me parler...",
         "La curiosité tue, n'est-ce pas ?",
-        "Adieu, détective."])
+        "Adieu, détective."], is_static=True)
 
 
         #setup items
@@ -219,9 +219,10 @@ class Game:
         else:
             command = self.commands[command_word]
             command.action(self, list_of_words, command.number_of_parameters)
-        for room in self.rooms:
-            for character in room.characters[:]:
-                character.move(debug=DEBUG)
+        if command_word not in ["look", "talk"]:
+            for room in self.rooms:
+                for character in room.characters[:]:
+                    character.move(debug=DEBUG)
 
     def win(self):
         """Vérifie si le joueur a gagné."""
