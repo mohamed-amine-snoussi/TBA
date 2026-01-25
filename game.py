@@ -112,6 +112,11 @@ class Game:
         "Une clé lourde ouvre une grille... mais je ne dis pas laquelle."])
         local_tech.characters.append(technicien)
 
+        homme_mysterieux = Character("Homme_Mysterieux","Un homme en long manteau noir, le visage dissimulé dans l'ombre. Son regard vous glace le sang.",ruelle,[
+        "Vous n'auriez pas dû me parler...",
+        "La curiosité tue, n'est-ce pas ?",
+        "Adieu, détective."])
+
 
         #setup items
         badge = Item("badge", "Badge d'accès réservé au personnel du poste", 0.05)
@@ -191,7 +196,9 @@ class Game:
                 print(f"\nFélicitations {self.player.name}, vous avez résolu l'affaire du LYS !")
                 self.finished = True
             elif self.loose():
-                print(f"\nVous avez échoué {self.player.name}. Vous êtes entré dans la salle secrète sans préparation.")
+                print(f"\n💀 GAME OVER 💀")
+                print(f"\nL'homme mystérieux vous a tué, {self.player.name}. Vous êtes mort dans la ruelle sombre...")
+                print(f"Peut-être auriez-vous dû éviter de lui parler...\n")
                 self.finished = True
         return None
 
@@ -223,8 +230,8 @@ class Game:
 
     def loose(self):
         """Vérifie si le joueur a perdu."""
-        # Désactivé pour éviter les conflits avec la victoire
-        return False
+        # Vérifier si le joueur a été tué par l'homme mystérieux
+        return hasattr(self.player, 'is_dead') and self.player.is_dead
 
     # Print the welcome message
     def print_welcome(self):

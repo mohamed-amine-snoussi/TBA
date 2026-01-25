@@ -373,6 +373,14 @@ class Actions:
 
         for character in room.characters:
             if character.name.lower() == character_name.lower():
+                # Cas spécial : l'homme mystérieux tue le joueur
+                if character.name == "Homme_Mysterieux":
+                    print("\n" + character.talk() + "\n")
+                    print("\n💀 L'homme mystérieux sort une lame de sous son manteau...")
+                    print("Tout devient noir...\n")
+                    game.player.is_dead = True
+                    return True
+                
                 print("\n" + character.talk() + "\n")
                 # Check quest objectives
                 if character.name == "Témoin":
