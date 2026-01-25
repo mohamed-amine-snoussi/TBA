@@ -14,7 +14,7 @@ from player import Player
 from command import Command
 from actions import Actions
 from item import Item
-from character import Character
+from character import Character, StaticCharacter
 from quest import Quest, QuestManager
 
 class Game:
@@ -112,7 +112,7 @@ class Game:
         "Une clé lourde ouvre une grille... mais je ne dis pas laquelle."])
         local_tech.characters.append(technicien)
 
-        homme_mysterieux = Character("Homme_Mysterieux","Un homme en long manteau noir, le visage dissimulé dans l'ombre. Son regard vous glace le sang.",ruelle,[
+        homme_mysterieux = StaticCharacter("Homme_Mysterieux","Un homme en long manteau noir, le visage dissimulé dans l'ombre. Son regard vous glace le sang.",ruelle,[
         "Vous n'auriez pas dû me parler...",
         "La curiosité tue, n'est-ce pas ?",
         "Adieu, détective."], is_static=True)
@@ -475,6 +475,17 @@ class GameGUI(tk.Tk):
         self.game.process_command(command)
         # Update room image after command (in case player moved)
         self._update_room_image()
+        
+        # Check win/lose conditions
+        if self.game.win():
+            print(f"\nFélicitations {self.game.player.name}, vous avez résolu l'affaire du LYS !")
+            self.game.finished = True
+        elif self.game.loose():
+            print(f"\n💀 GAME OVER 💀")
+            print(f"\nL'homme mystérieux vous a tué, {self.game.player.name}. Vous êtes mort dans la ruelle sombre...")
+            print(f"Peut-être auriez-vous dû éviter de lui parler...\n")
+            self.game.finished = True
+        
         if self.game.finished:
             # Disable further input and schedule close (brief delay to show farewell)
             self.entry.configure(state="disabled")

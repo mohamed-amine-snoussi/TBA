@@ -70,3 +70,14 @@ class Character:
             print(f"DEBUG: {self.name} se déplace vers {new_room.name}")
 
         return True
+
+
+class StaticCharacter(Character):
+    """
+    Personnage qui ne se déplace jamais.
+    """
+    def move(self, debug=False):
+        """Ce personnage ne bouge jamais."""
+        if debug:
+            print(f"DEBUG: {self.name} est statique et ne se déplace pas")
+        return False

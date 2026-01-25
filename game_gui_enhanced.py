@@ -456,6 +456,16 @@ class GameGUIEnhanced(tk.Tk):
         self.game.process_command(command)
         self._update_display()
         
+        # Check win/lose conditions
+        if self.game.win():
+            print(f"\nFélicitations {self.game.player.name}, vous avez résolu l'affaire du LYS !")
+            self.game.finished = True
+        elif self.game.loose():
+            print(f"\n💀 GAME OVER 💀")
+            print(f"\nL'homme mystérieux vous a tué, {self.game.player.name}. Vous êtes mort dans la ruelle sombre...")
+            print(f"Peut-être auriez-vous dû éviter de lui parler...\n")
+            self.game.finished = True
+        
         if self.game.finished:
             self.input_entry.config(state='disabled')
             messagebox.showinfo("Fin du jeu", "Partie terminée!")
@@ -479,6 +489,12 @@ class GameGUIEnhanced(tk.Tk):
     def _do_talk(self, char_name, dialog):
         """Execute the talk command."""
         dialog.destroy()
+        # Vérifier que le personnage est toujours dans la salle
+        room = self.game.player.current_room
+        char_names_in_room = [c.name for c in room.characters]
+        if char_name not in char_names_in_room:
+            print(f"\n{char_name} n'est plus dans cette salle.\n")
+            return
         self._execute_command(f'talk {char_name}')
     
     def _on_take(self):
